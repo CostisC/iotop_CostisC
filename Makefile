@@ -22,16 +22,16 @@ SRCS:=$(wildcard src/*.c)
 OBJS:=$(patsubst %c,%o,$(patsubst src/%,bld/%,$(SRCS)))
 DEPS:=$(OBJS:.o=.d)
 
+CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 ifndef NO_FLTO
-CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 CFLAGS+=-flto=auto
-else
-CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 endif
 
 ifdef GCCFANALIZER
 CFLAGS+=-fanalyzer
 endif
+
+libnl-support: CFLAGS += -I/usr/include/libnl3 -lnl-3 -lnl-genl-3
 
 PREFIX?=$(DESTDIR)/usr
 INSTALL?=install
@@ -80,6 +80,9 @@ E:=@echo
 endif
 
 all: $(TARGET)
+
+libnl-support: #all
+	echo $(LIBS)
 
 $(TARGET): $(OBJS)
 	$(E) LD $@
@@ -132,4 +135,4 @@ re:
 
 -include $(DEPS)
 
-.PHONY: all clean install uninstall mkotar re
+.PHONY: all clean install uninstall mkotar re libnl-support
