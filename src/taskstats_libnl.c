@@ -32,7 +32,7 @@ typedef struct netlink_info_t {
 } netlink_info;
 
 static netlink_info nl;
-static taskstats_t ts; 
+static taskstats_t ts;
 
 inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
     // Construct the request message
@@ -42,7 +42,7 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
         return -1;
     }
     // ...append the message header
-    genlmsg_put(msg, 
+    genlmsg_put(msg,
                 NL_AUTO_PORT,
 	            NL_AUTO_SEQ,
 	            nl->id,
@@ -96,13 +96,13 @@ int parse_taskstats_callback(struct nl_msg *msg, void *arg) {
 	          TASKSTATS_TYPE_MAX,
 	          genlmsg_attrdata(gnlh, 0),
 	          genlmsg_attrlen(gnlh, 0),
-	          NULL); 
+	          NULL);
 
     struct nlattr *aggr_type = NULL;
 
     if (tb[TASKSTATS_TYPE_AGGR_PID])
         aggr_type = tb[TASKSTATS_TYPE_AGGR_PID];
-    else if (tb[TASKSTATS_TYPE_AGGR_TGID]) 
+    else if (tb[TASKSTATS_TYPE_AGGR_TGID])
         aggr_type = tb[TASKSTATS_TYPE_AGGR_TGID];
 
     if (!aggr_type)
@@ -145,13 +145,13 @@ inline void nl_init_libnl(void) {
 nliniterror:
     nl_socket_free(nl.sk);
     exit(EXIT_FAILURE);
-    
+
 }
 
 inline void nl_fini_linbl(void) {
     nl_socket_free(nl.sk);
 }
-    
+
 #endif // LIBNL sentry
 
 //// ******************************************* //

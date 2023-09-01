@@ -22,20 +22,18 @@ SRCS:=$(wildcard src/*.c)
 OBJS:=$(patsubst %c,%o,$(patsubst src/%,bld/%,$(SRCS)))
 DEPS:=$(OBJS:.o=.d)
 
-CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 ifndef NO_FLTO
+CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 CFLAGS+=-flto=auto
+else
+CFLAGS?=-O3 -fno-stack-protector -mno-stackrealign
 endif
 
 ifdef GCCFANALIZER
 CFLAGS+=-fanalyzer
 endif
 
-libnl-support: CFLAGS += -I/usr/include/libnl3 -lnl-3 -lnl-genl-3
-
-PREFIX?=$(DESTDIR)/usr
 INSTALL?=install
-STRIP?=strip
 
 PKG_CONFIG?=pkg-config
 NCCC?=$(shell $(PKG_CONFIG) --cflags ncursesw)
@@ -56,20 +54,22 @@ HAVESREA:=$(shell if $(CC) -mno-stackrealign -xc -c /dev/null -o /dev/null >/dev
 # old comiplers do not have -Wdate-time
 HAVEWDTI:=$(shell if $(CC) -Wdate-time -xc -c /dev/null -o /dev/null >/dev/null 2>/dev/null;then echo yes;else echo no;fi)
 
+MYCFLAGS:=$(CPPFLAGS) $(CFLAGS) $(NCCC) -Wall -Wextra -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 --std=gnu89 -fPIE
 ifeq ("$(HAVESREA)","no")
-CFLAGS:=$(filter-out -mno-stackrealign,$(CFLAGS))
+MYCFLAGS:=$(filter-out -mno-stackrealign,$(MYCFLAGS))
 endif
 ifeq ("$(HAVEWDTI)","no")
-CFLAGS:=$(filter-out -Wdate-time,$(CFLAGS))
+MYCFLAGS:=$(filter-out -Wdate-time,$(MYCFLAGS))
 endif
 
-MYCFLAGS:=$(CPPFLAGS) $(CFLAGS) $(NCCC) -Wall -Wextra -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 --std=gnu89 -fPIE
 MYLIBS:=$(NCLD) $(LIBS)
 MYLDFLAGS:=$(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fPIE -pie
-
 ifeq ("$(NEEDLRT)","need")
 MYLDFLAGS+=-lrt
 endif
+STRIP?=strip
+
+PREFIX?=$(DESTDIR)/usr
 
 ifeq ("$(V)","1")
 Q:=
@@ -80,9 +80,6 @@ E:=@echo
 endif
 
 all: $(TARGET)
-
-libnl-support: #all
-	echo $(LIBS)
 
 $(TARGET): $(OBJS)
 	$(E) LD $@
@@ -135,4 +132,4 @@ re:
 
 -include $(DEPS)
 
-.PHONY: all clean install uninstall mkotar re libnl-support
+.PHONY: all clean install uninstall mkotar re
