@@ -33,7 +33,9 @@ ifdef GCCFANALIZER
 CFLAGS+=-fanalyzer
 endif
 
+PREFIX?=$(DESTDIR)/usr
 INSTALL?=install
+STRIP?=strip
 
 PKG_CONFIG?=pkg-config
 NCCC	?= $(shell $(PKG_CONFIG) --cflags ncursesw)
@@ -64,21 +66,22 @@ HAVESREA:=$(shell if $(CC) -mno-stackrealign -xc -c /dev/null -o /dev/null >/dev
 HAVEWDTI:=$(shell if $(CC) -Wdate-time -xc -c /dev/null -o /dev/null >/dev/null 2>/dev/null;then echo yes;else echo no;fi)
 
 MYCFLAGS:=$(CPPFLAGS) $(CFLAGS) $(NCCC) -Wall -Wextra -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 --std=gnu89 -fPIE
-ifeq ("$(HAVESREA)","no")
-MYCFLAGS:=$(filter-out -mno-stackrealign,$(MYCFLAGS))
-endif
-ifeq ("$(HAVEWDTI)","no")
-MYCFLAGS:=$(filter-out -Wdate-time,$(MYCFLAGS))
-endif
-
 MYLIBS:=$(NCLD) $(LIBS)
 MYLDFLAGS:=$(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fPIE -pie
+
+ifeq ("$(HAVESREA)","no")
+MYCFLAGS:=$(filter-out -mno-stackrealign,$(MYCFLAGS))
+MYLDFLAGS:=$(filter-out -mno-stackrealign,$(MYLDFLAGS))
+endif
+
+ifeq ("$(HAVEWDTI)","no")
+MYCFLAGS:=$(filter-out -Wdate-time,$(MYCFLAGS))
+MYLDFLAGS:=$(filter-out -Wdate-time,$(MYLDFLAGS))
+endif
+
 ifeq ("$(NEEDLRT)","need")
 MYLDFLAGS+=-lrt
 endif
-STRIP?=strip
-
-PREFIX?=$(DESTDIR)/usr
 
 ifeq ("$(V)","1")
 Q:=
@@ -141,6 +144,19 @@ re:
 	$(Q)$(MAKE) --no-print-directory clean
 	$(Q)$(MAKE) --no-print-directory -j
 
+pv:
+	@echo CFLAGS: $(CFLAGS)
+	@echo LDFLAGS: $(LDFLAGS)
+	@echo LIBS: $(LIBS)
+	@echo NCCC: $(NCCC)
+	@echo NCLD: $(NCLD)
+	@echo NEEDLRT: $(NEEDLRT)
+	@echo HAVESREA: $(HAVESREA)
+	@echo HAVEWDTI: $(HAVEWDTI)
+	@echo MYCFLAGS: $(MYCFLAGS)
+	@echo MYLDFLAGS: $(MYLDFLAGS)
+	@echo MYLIBS: $(MYLIBS)
+
 -include $(DEPS)
 
-.PHONY: all clean install uninstall mkotar re libnl_support
+.PHONY: all clean install uninstall mkotar re pv libnl_support
