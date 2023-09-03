@@ -23,6 +23,7 @@ You should have received a copy of the GNU General Public License along with thi
 #include <netlink/genl/ctrl.h>
 
 
+
 typedef struct taskstats taskstats_t;
 
 typedef struct netlink_info_t {
@@ -51,7 +52,7 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
 	            TASKSTATS_CMD_GET,
 	            0x1);
     // ...append the pid attribute
-    nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, pid);
+    nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, tid);
     //nl_msg_dump(msg, stdout);
     int r;
     r = nl_send_auto(nl.sk, msg);
@@ -76,6 +77,7 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
     COPY(blkio_delay_total);
     #undef COPY
     stats->euid=ts.ac_uid;
+
 
     nlmsg_free(msg);
     return 0;
@@ -136,6 +138,8 @@ inline void nl_init_libnl(void) {
         fprintf(stderr, TASKSTATS_GENL_NAME " Generic Netlink family not found\n");
         goto nliniterror;
     }
+    // disable ACK for the following taskset requests
+    nl_socket_disable_auto_ack(nl.sk);
 
     nl.cb = nl_cb_alloc(NL_CB_DEFAULT);
     nl_cb_set(nl.cb, NL_CB_VALID, NL_CB_CUSTOM, parse_taskstats_callback, &ts);
@@ -154,30 +158,3 @@ inline void nl_fini_libnl(void) {
 
 #endif // LIBNL sentry
 
-//// ******************************************* //
-//// ******************************************* //
-//
-//int main(int argc, char **argv) {
-//
-//    pid_t pid = (argc>1)? atoi(argv[1]) : 1;
-//
-//    nl_init();
-//
-//    int r = get_pid_info(&nl, pid);
-//
-//    if (!r) {
-//        #define PRT(field) printf(#field ": %lld\n", ts.field);
-//        #define DELAY(field) printf(#field ": %.3f ms\n", ts.field/(float)1e9);
-//        PRT(read_bytes);
-//        PRT(write_bytes);
-//        PRT(swapin_delay_total);
-//        DELAY(blkio_delay_total)
-//        DELAY(cpu_delay_total)
-//        PRT(ac_uid);
-//        #undef PRT
-//        #undef DELAY
-//    }
-//    nl_fini();
-//
-//
-//}
