@@ -27,7 +27,8 @@ You should have received a copy of the GNU General Public License along with thi
 /*
  * Generic macros for dealing with netlink sockets. Might be duplicated
  * elsewhere. It is recommended that commercial grade applications use
- * libnl or libnetlink and use the interfaces provided by the library
+ * libnl (ref. 'make libnl_support') or libnetlink 
+ * and use the interfaces provided by the library
  */
 #define GENLMSG_DATA(glh)	   ((void *)((char*)NLMSG_DATA(glh) + GENL_HDRLEN))
 #define GENLMSG_PAYLOAD(glh)	(NLMSG_PAYLOAD(glh, 0) - GENL_HDRLEN)
@@ -63,7 +64,7 @@ inline int send_cmd(int sock_fd,__u16 nlmsg_type,__u32 nlmsg_pid,__u8 genl_cmd,_
 	msg.n.nlmsg_seq=0;
 	msg.n.nlmsg_pid=nlmsg_pid;
 	msg.g.cmd=genl_cmd;
-	msg.g.version=0x1;
+	msg.g.version=TASKSTATS_GENL_VERSION;
 
 	na=(struct nlattr *)GENLMSG_DATA(&msg);
 	na->nla_type=nla_type;

@@ -39,7 +39,7 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
     // Construct the request message
     struct nl_msg *msg = nlmsg_alloc();
     if (!msg) {
-        //fprintf(stderr, "Failed to allocate Netlink message\n");
+        fprintf(stderr, "Failed to allocate Netlink message\n");
         return -1;
     }
     // ...append the message header
@@ -50,21 +50,21 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
 	            0,
 	            0,
 	            TASKSTATS_CMD_GET,
-	            0x1);
+	            TASKSTATS_GENL_VERSION);
     // ...append the pid attribute
     nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, tid);
     //nl_msg_dump(msg, stdout);
     int r;
     r = nl_send_auto(nl.sk, msg);
     if (r<0) {
-        //fprintf(stderr, "Failed to send request for pid %d\n", pid);
+        fprintf(stderr, "Failed to send request for pid %d\n", pid);
         goto getpiderror;
     }
 
     // Receive and process the response
     r = nl_recvmsgs(nl.sk, nl.cb);
     if (r<0) {
-        //fprintf(stderr, "Failed to get response for pid %d\n", pid);
+        fprintf(stderr, "Failed to get response for pid %d\n", pid);
         goto getpiderror;
     }
 
@@ -111,7 +111,7 @@ int parse_taskstats_callback(struct nl_msg *msg, void *arg) {
         return NL_SKIP;
 
     if (nla_parse_nested(tb, TASKSTATS_TYPE_MAX, aggr_type, NULL)) {
-        //fprintf(stderr, "Failed to parse nested 'stats' attribute \n");
+        fprintf(stderr, "Failed to parse nested 'stats' attribute \n");
         return NL_SKIP;
     }
 
