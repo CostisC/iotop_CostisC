@@ -159,7 +159,7 @@ struct act_stats {
 inline void nl_init(void);
 inline void nl_fini(void);
 inline void nl_init_libnl(void);
-inline void nl_fini_linbl(void);
+inline void nl_fini_libnl(void);
 
 inline int nl_xxxid_info(pid_t tid,pid_t pid,struct xxxid_stats *stats);
 inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats);

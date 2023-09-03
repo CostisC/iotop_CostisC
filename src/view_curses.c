@@ -2204,14 +2204,14 @@ inline void view_curses_init(void) {
 	whelp=newwin(hh,hw,hx,hy);
 	if (!whelp) {
 		view_curses_fini();
-		SWITCH( nl_fini() );
+		SWITCH(nl_fini)();
 		fprintf(stderr,"Error: can not allocate help window\n");
 		exit(1);
 	}
 	wtda=newwin(whh,whw,whx,why);
 	if (!whelp) {
 		view_curses_fini();
-		SWITCH( nl_fini() );
+		SWITCH(nl_fini)();
 		fprintf(stderr,"Error: can not allocate warning window\n");
 		exit(1);
 	}

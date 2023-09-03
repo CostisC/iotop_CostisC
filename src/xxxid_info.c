@@ -42,7 +42,7 @@ inline struct xxxid_stats *make_stats(pid_t tid,pid_t pid) {
 	if (!s)
 		return NULL;
 
-	if (SWITCH( nl_xxxid_info(tid,pid,s) ))
+	if ( SWITCH(nl_xxxid_info)(tid,pid,s) )
 		s->error_x=1;
 
 

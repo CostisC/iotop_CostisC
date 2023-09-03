@@ -45,7 +45,7 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
     genlmsg_put(msg,
                 NL_AUTO_PORT,
 	            NL_AUTO_SEQ,
-	            nl->id,
+	            nl.id,
 	            0,
 	            0,
 	            TASKSTATS_CMD_GET,
@@ -54,14 +54,14 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
     nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, pid);
     //nl_msg_dump(msg, stdout);
     int r;
-    r = nl_send_auto(nl->sk, msg);
+    r = nl_send_auto(nl.sk, msg);
     if (r<0) {
         //fprintf(stderr, "Failed to send request for pid %d\n", pid);
         goto getpiderror;
     }
 
     // Receive and process the response
-    r = nl_recvmsgs(nl->sk, nl->cb);
+    r = nl_recvmsgs(nl.sk, nl.cb);
     if (r<0) {
         //fprintf(stderr, "Failed to get response for pid %d\n", pid);
         goto getpiderror;
@@ -69,13 +69,13 @@ inline int nl_xxxid_info_libnl(pid_t tid,pid_t pid,struct xxxid_stats *stats) {
 
     stats->pid = pid;
     stats->tid = tid;
-    #define COPY(field) { stats->field = ts->field; }
+    #define COPY(field) { stats->field = ts.field; }
     COPY(read_bytes);
     COPY(write_bytes);
     COPY(swapin_delay_total);
     COPY(blkio_delay_total);
     #undef COPY
-    stats->euid=ts->ac_uid;
+    stats->euid=ts.ac_uid;
 
     nlmsg_free(msg);
     return 0;
@@ -148,7 +148,7 @@ nliniterror:
 
 }
 
-inline void nl_fini_linbl(void) {
+inline void nl_fini_libnl(void) {
     nl_socket_free(nl.sk);
 }
 
